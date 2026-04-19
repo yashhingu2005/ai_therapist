@@ -110,6 +110,26 @@ create table if not exists public.exercise_completions (
   completed_at timestamptz
 );
 
+create table if not exists public.cbt_journals (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  title text not null default 'Thought record',
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.cbt_journal_pages (
+  id uuid primary key default gen_random_uuid(),
+  journal_id uuid not null references public.cbt_journals(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  page_no integer not null check (page_no > 0),
+  title text not null default 'Page 1',
+  content jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now()),
+  unique (journal_id, page_no)
+);
+
 create index if not exists idx_therapy_sessions_user_started_at
   on public.therapy_sessions (user_id, started_at desc);
 
@@ -124,6 +144,12 @@ create index if not exists idx_mood_entries_session_id
 
 create index if not exists idx_exercise_completions_user_started_at
   on public.exercise_completions (user_id, started_at desc);
+
+create index if not exists idx_cbt_journals_user_created_at
+  on public.cbt_journals (user_id, created_at desc);
+
+create index if not exists idx_cbt_journal_pages_journal_page_no
+  on public.cbt_journal_pages (journal_id, page_no);
 
 create or replace function public.handle_new_user()
 returns trigger
@@ -169,6 +195,16 @@ create trigger trg_guided_exercises_updated_at
 before update on public.guided_exercises
 for each row execute procedure public.set_updated_at();
 
+drop trigger if exists trg_cbt_journals_updated_at on public.cbt_journals;
+create trigger trg_cbt_journals_updated_at
+before update on public.cbt_journals
+for each row execute procedure public.set_updated_at();
+
+drop trigger if exists trg_cbt_journal_pages_updated_at on public.cbt_journal_pages;
+create trigger trg_cbt_journal_pages_updated_at
+before update on public.cbt_journal_pages
+for each row execute procedure public.set_updated_at();
+
 alter table public.profiles enable row level security;
 alter table public.therapy_sessions enable row level security;
 alter table public.session_messages enable row level security;
@@ -177,6 +213,8 @@ alter table public.mood_entries enable row level security;
 alter table public.mood_entry_tags enable row level security;
 alter table public.guided_exercises enable row level security;
 alter table public.exercise_completions enable row level security;
+alter table public.cbt_journals enable row level security;
+alter table public.cbt_journal_pages enable row level security;
 
 drop policy if exists "profiles_select_own" on public.profiles;
 create policy "profiles_select_own"
@@ -247,6 +285,22 @@ to authenticated
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
 
+drop policy if exists "cbt_journals_own_all" on public.cbt_journals;
+create policy "cbt_journals_own_all"
+on public.cbt_journals
+for all
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+drop policy if exists "cbt_journal_pages_own_all" on public.cbt_journal_pages;
+create policy "cbt_journal_pages_own_all"
+on public.cbt_journal_pages
+for all
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
 drop policy if exists "mood_tags_read_all" on public.mood_tags;
 create policy "mood_tags_read_all"
 on public.mood_tags
@@ -294,7 +348,7 @@ values
   ),
   (
     'grounding-5-4-3-2-1',
-    '5-4-3-2-1 Grounding',
+    'Anchor Exercise',
     'Return to the present',
     'Use your five senses to anchor yourself during anxiety.',
     'grounding',

@@ -8,6 +8,7 @@ jest.mock('./lib/supabase', () => ({
 
 test('renders auth screen when not signed in', () => {
   render(<App />);
+  expect(screen.getByText('Serenity')).toBeInTheDocument();
   expect(screen.getByText('Continue with your calm space.')).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeInTheDocument();
 });

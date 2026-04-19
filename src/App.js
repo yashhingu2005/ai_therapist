@@ -12,23 +12,45 @@ function IconBase({ children }) {
 }
 
 function ChatIcon() {
-  return <IconBase><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></IconBase>;
+  return (
+    <IconBase>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </IconBase>
+  );
 }
 
 function PulseIcon() {
-  return <IconBase><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></IconBase>;
+  return (
+    <IconBase>
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </IconBase>
+  );
 }
 
 function BookIcon() {
-  return <IconBase><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></IconBase>;
+  return (
+    <IconBase>
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </IconBase>
+  );
 }
 
 function HeartIcon() {
-  return <IconBase><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></IconBase>;
+  return (
+    <IconBase>
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </IconBase>
+  );
 }
 
 function PlusIcon() {
-  return <IconBase><path d="M12 5v14" /><path d="M5 12h14" /></IconBase>;
+  return (
+    <IconBase>
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </IconBase>
+  );
 }
 
 function TrashIcon() {
@@ -80,8 +102,8 @@ const MOODS = [
 const TAGS = ['Hopeful', 'Anxious', 'Grateful', 'Tired', 'Stressed', 'Calm'];
 const EXERCISES = [
   { id: 'box', icon: 'Air', title: 'Box Breathing', subtitle: 'Calm your nervous system', accent: 'green' },
-  { id: 'grounding', icon: 'Anchor', title: '5-4-3-2-1 Grounding', subtitle: 'Return to the present', accent: 'sand' },
-  { id: 'thought', icon: 'CBT', title: 'Thought Record', subtitle: 'Challenge negative thinking', accent: 'clay' },
+  { id: 'grounding', icon: 'Anchor', title: 'Anchor Exercise', subtitle: 'Return to the present', accent: 'sand' },
+  { id: 'thought', icon: 'CBT', title: 'CBT Journal', subtitle: 'Write and reframe', accent: 'clay' },
 ];
 const BREATH_PHASES = [
   { label: 'Inhale', duration: 4, instruction: 'Breathe in slowly through your nose' },
@@ -89,10 +111,25 @@ const BREATH_PHASES = [
   { label: 'Exhale', duration: 4, instruction: 'Breathe out slowly through your mouth' },
   { label: 'Hold', duration: 4, instruction: 'Pause before the next breath' },
 ];
+const GROUNDING_STEPS = [
+  { count: 5, label: 'see', prompt: 'Name five things you can see around you.' },
+  { count: 4, label: 'feel', prompt: 'Name four things you can feel right now.' },
+  { count: 3, label: 'hear', prompt: 'Name three sounds you can hear.' },
+  { count: 2, label: 'smell', prompt: 'Name two things you can smell.' },
+  { count: 1, label: 'taste', prompt: 'Name one thing you can taste or would like to taste.' },
+];
+const CBT_FIELDS = [
+  { key: 'situation', label: 'Situation' },
+  { key: 'thought', label: 'Automatic thought' },
+  { key: 'emotion', label: 'Emotion' },
+  { key: 'evidence_for', label: 'Evidence for' },
+  { key: 'evidence_against', label: 'Evidence against' },
+  { key: 'balanced_thought', label: 'Balanced thought' },
+];
 const CHAT_TITLE_PATTERN = /^Chat (\d+)$/;
 const CHAT_HEADER_PROMPT = 'How are you feeling today?';
 const INITIAL_ASSISTANT_MESSAGE =
-  'Hello, I am Ai Therapist. This is a calm, judgment-free space. How are you feeling today?';
+  'Hello, I am Serenity. This is a calm, judgment-free space. How are you feeling today?';
 const DEMO_ENTRIES = [2, 3, 2, 4, 3, 3, 4, 3, 5, 4, 3, 4, 4, 4].map((value, index, values) => ({
   id: `demo-${index}`,
   mood_value: value,
@@ -121,10 +158,7 @@ function buildAutoChatTitle(messageText, fallbackTitle) {
     return normalizedFallback;
   }
 
-  const cleanedMessage = normalizedMessage
-    .replace(/[\r\n]+/g, ' ')
-    .replace(/[.!?,;:]+$/g, '')
-    .trim();
+  const cleanedMessage = normalizedMessage.replace(/[\r\n]+/g, ' ').replace(/[.!?,;:]+$/g, '').trim();
   const shortened = cleanedMessage.split(' ').filter(Boolean).slice(0, 8).join(' ');
   const candidateTitle = normalizeChatTitle(shortened, normalizedFallback);
 
@@ -161,6 +195,30 @@ function resolveSessionTitle(currentTitle, sessionMessages, fallbackTitle) {
   return buildAutoChatTitle(getFirstUserMessageText(sessionMessages), normalizedCurrent || fallbackTitle);
 }
 
+function getLocalDayKey(dateString) {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function buildBlankJournalPage(pageNumber) {
+  return {
+    id: `local-page-${pageNumber}`,
+    page_no: pageNumber,
+    title: `Page ${pageNumber}`,
+    content: {
+      situation: '',
+      thought: '',
+      emotion: '',
+      evidence_for: '',
+      evidence_against: '',
+      balanced_thought: '',
+    },
+  };
+}
+
 function App() {
   const [session, setSession] = useState(null);
   const [authMode, setAuthMode] = useState('login');
@@ -194,9 +252,22 @@ function App() {
   const [moodEntries, setMoodEntries] = useState(DEMO_ENTRIES);
   const [moodStatus, setMoodStatus] = useState('Sign in to load your mood history.');
   const [isMoodSaving, setIsMoodSaving] = useState(false);
-  const [draftSessionTitle, setDraftSessionTitle] = useState('');
-  const [chatTitleInput, setChatTitleInput] = useState('');
+  const [speechStatus, setSpeechStatus] = useState('Tap the mic to dictate.');
+  const [isListening, setIsListening] = useState(false);
+  const [isGroundingOpen, setIsGroundingOpen] = useState(false);
+  const [groundingStepIndex, setGroundingStepIndex] = useState(0);
+  const [groundingInput, setGroundingInput] = useState('');
+  const [groundingResponses, setGroundingResponses] = useState([]);
+  const [groundingFinished, setGroundingFinished] = useState(false);
+  const [activeExerciseId, setActiveExerciseId] = useState(null);
+  const [journalList, setJournalList] = useState([]);
+  const [activeJournalId, setActiveJournalId] = useState(null);
+  const [activeJournalPageId, setActiveJournalPageId] = useState(null);
+  const [journalStatus, setJournalStatus] = useState('Choose a page to write.');
+  const [isJournalLoading, setIsJournalLoading] = useState(false);
+  const [isJournalSaving, setIsJournalSaving] = useState(false);
   const messagesRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const userId = session?.user?.id ?? null;
   const profileLabel = session?.user?.user_metadata?.display_name || session?.user?.email || 'Signed in user';
@@ -213,29 +284,45 @@ function App() {
     [sessionList]
   );
   const defaultChatTitle = useMemo(() => getDefaultChatTitle(nextChatNumber), [nextChatNumber]);
-
-  useEffect(() => {
-    setChatTitleInput(activeSession?.title || draftSessionTitle || defaultChatTitle);
-  }, [activeSession?.id, activeSession?.title, draftSessionTitle, defaultChatTitle]);
-
   const recentMoodEntries = useMemo(() => {
     const sorted = [...moodEntries].sort(
       (left, right) => new Date(left.created_at).getTime() - new Date(right.created_at).getTime()
     );
     return sorted.slice(-14);
   }, [moodEntries]);
-
   const moodAverage = useMemo(() => {
     if (!moodEntries.length) {
       return 0;
     }
     return moodEntries.reduce((sum, entry) => sum + Number(entry.mood_value || 0), 0) / moodEntries.length;
   }, [moodEntries]);
-
   const averageMood = useMemo(() => {
     const rounded = Math.max(1, Math.min(5, Math.round(moodAverage || trackerMood)));
     return MOODS.find((mood) => mood.value === rounded) ?? MOODS[0];
   }, [moodAverage, trackerMood]);
+  const todayMoodCount = useMemo(() => {
+    const todayKey = getLocalDayKey(new Date().toISOString());
+    return moodEntries.filter((entry) => getLocalDayKey(entry.created_at) === todayKey).length;
+  }, [moodEntries]);
+  const canLogMoodToday = todayMoodCount < 3;
+  const displayedChatTitle = useMemo(() => {
+    const sourceMessages = activeSession?.messages?.length ? activeSession.messages : messages;
+    const firstUserMessage = getFirstUserMessageText(sourceMessages);
+    if (!firstUserMessage) {
+      return 'New chat';
+    }
+    return resolveSessionTitle(activeSession?.title || '', sourceMessages, defaultChatTitle);
+  }, [activeSession?.messages, activeSession?.title, defaultChatTitle, messages]);
+  const speechRecognitionSupported = typeof window !== 'undefined'
+    && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
+  const activeJournal = useMemo(
+    () => journalList.find((journal) => journal.id === activeJournalId) ?? null,
+    [journalList, activeJournalId]
+  );
+  const activeJournalPage = useMemo(
+    () => activeJournal?.pages.find((page) => page.id === activeJournalPageId) ?? null,
+    [activeJournal, activeJournalPageId]
+  );
 
   useEffect(() => {
     if (!messagesRef.current) {
@@ -273,7 +360,6 @@ function App() {
           setActiveSessionId(null);
           setMessages([{ role: 'assistant', text: INITIAL_ASSISTANT_MESSAGE }]);
           setDraft('');
-          setDraftSessionTitle('');
           setChatStatus(
             hasGeminiConfig
               ? 'New chat ready. Your next message will start a stored Gemini session.'
@@ -318,6 +404,18 @@ function App() {
     }, 1000);
     return () => window.clearInterval(timer);
   }, [breathRunning, breathPhase, breathingFinished]);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.onstart = null;
+        recognitionRef.current.onresult = null;
+        recognitionRef.current.onerror = null;
+        recognitionRef.current.onend = null;
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let ignore = false;
@@ -372,11 +470,12 @@ function App() {
       if (normalized.length > 0) {
         setTrackerMood(normalized[0].mood_value);
         setSelectedTags(normalized[0].tags);
-        setMoodStatus('Mood history loaded from Supabase.');
-      } else {
-        setSelectedTags([]);
-        setMoodStatus('No mood entries yet. Log your first check-in.');
       }
+      setMoodStatus(
+        normalized.length > 0
+          ? `Mood history loaded. ${Math.max(0, 3 - normalized.filter((entry) => getLocalDayKey(entry.created_at) === getLocalDayKey(new Date().toISOString())).length)} mood logs left today.`
+          : 'No mood entries yet. You can log up to 3 moods today.'
+      );
     }
     loadMoodData();
     return () => {
@@ -391,7 +490,6 @@ function App() {
         setSessionList([]);
         setActiveSessionId(null);
         setMessages([{ role: 'assistant', text: INITIAL_ASSISTANT_MESSAGE }]);
-        setDraftSessionTitle('');
         setChatStatus(
           hasGeminiConfig
             ? 'Sign in to start a Gemini-powered chat.'
@@ -432,26 +530,26 @@ function App() {
       }
       const normalizedSessions = (data ?? []).map((item) => {
         const sessionMessages = (item.session_messages ?? []).sort((left, right) => left.sequence_no - right.sequence_no);
+        const normalizedMessages = sessionMessages.map((message) => ({
+          id: message.id,
+          role: message.sender_role === 'assistant' ? 'assistant' : message.sender_role,
+          text: message.content,
+          created_at: message.created_at,
+          sequence_no: message.sequence_no,
+        }));
         return {
           id: item.id,
-          title: item.title,
+          title: resolveSessionTitle(item.title || '', normalizedMessages, item.title || defaultChatTitle),
           summary: item.summary,
           started_at: item.started_at,
           session_status: item.session_status,
           initial_mood_value: item.initial_mood_value,
-          messages: sessionMessages.map((message) => ({
-            id: message.id,
-            role: message.sender_role === 'assistant' ? 'assistant' : message.sender_role,
-            text: message.content,
-            created_at: message.created_at,
-            sequence_no: message.sequence_no,
-          })),
+          messages: normalizedMessages,
         };
       });
       setSessionList(normalizedSessions);
       setActiveSessionId(null);
       setMessages([{ role: 'assistant', text: INITIAL_ASSISTANT_MESSAGE }]);
-      setDraftSessionTitle('');
       setChatStatus(
         normalizedSessions.length > 0
           ? 'New chat ready. Previous conversations are available in History.'
@@ -460,6 +558,84 @@ function App() {
       setIsSessionLoading(false);
     }
     loadChatSessions();
+    return () => {
+      ignore = true;
+    };
+  }, [defaultChatTitle, userId]);
+
+  useEffect(() => {
+    let ignore = false;
+    async function loadJournals() {
+      if (!supabase || !userId) {
+        setJournalList([
+          {
+            id: 'local-journal',
+            title: 'Thought record',
+            pages: [buildBlankJournalPage(1)],
+          },
+        ]);
+        setActiveJournalId('local-journal');
+        setActiveJournalPageId('local-page-1');
+        setJournalStatus('Local journal ready.');
+        return;
+      }
+      setIsJournalLoading(true);
+      const { data, error } = await supabase
+        .from('cbt_journals')
+        .select(`
+          id,
+          title,
+          created_at,
+          cbt_journal_pages (
+            id,
+            title,
+            page_no,
+            content,
+            created_at,
+            updated_at
+          )
+        `)
+        .order('created_at', { ascending: true })
+        .order('page_no', { foreignTable: 'cbt_journal_pages', ascending: true });
+      if (ignore) {
+        return;
+      }
+      if (error) {
+        setJournalStatus(`Failed to load journals: ${error.message}`);
+        setIsJournalLoading(false);
+        return;
+      }
+      const normalized = (data ?? []).map((journal) => ({
+        ...journal,
+        pages: (journal.cbt_journal_pages ?? [])
+          .sort((left, right) => left.page_no - right.page_no)
+          .map((page) => ({
+            ...page,
+            content: {
+              situation: page.content?.situation || '',
+              thought: page.content?.thought || '',
+              emotion: page.content?.emotion || '',
+              evidence_for: page.content?.evidence_for || '',
+              evidence_against: page.content?.evidence_against || '',
+              balanced_thought: page.content?.balanced_thought || '',
+            },
+          })),
+      }));
+      if (normalized.length === 0) {
+        setJournalList([]);
+        setActiveJournalId(null);
+        setActiveJournalPageId(null);
+        setJournalStatus('Create a journal page to begin.');
+        setIsJournalLoading(false);
+        return;
+      }
+      setJournalList(normalized);
+      setActiveJournalId(normalized[0].id);
+      setActiveJournalPageId(normalized[0].pages[0]?.id ?? null);
+      setJournalStatus('Journal loaded from Supabase.');
+      setIsJournalLoading(false);
+    }
+    loadJournals();
     return () => {
       ignore = true;
     };
@@ -511,7 +687,9 @@ function App() {
     setActiveSessionId(null);
     setMessages([{ role: 'assistant', text: INITIAL_ASSISTANT_MESSAGE }]);
     setDraft('');
-    setDraftSessionTitle('');
+    setJournalList([]);
+    setActiveJournalId(null);
+    setActiveJournalPageId(null);
   };
 
   const toggleTag = (tag) => {
@@ -542,27 +720,76 @@ function App() {
     setBreathRunning((current) => !current);
   };
 
+  const openGrounding = () => {
+    setIsGroundingOpen(true);
+    setGroundingStepIndex(0);
+    setGroundingInput('');
+    setGroundingResponses([]);
+    setGroundingFinished(false);
+  };
+
+  const closeGrounding = () => {
+    setIsGroundingOpen(false);
+    setGroundingInput('');
+  };
+
+  const advanceGrounding = () => {
+    const trimmed = groundingInput.trim();
+    if (!trimmed) {
+      return;
+    }
+    const nextResponses = [...groundingResponses, { ...GROUNDING_STEPS[groundingStepIndex], text: trimmed }];
+    setGroundingResponses(nextResponses);
+    if (groundingStepIndex === GROUNDING_STEPS.length - 1) {
+      setGroundingFinished(true);
+      setGroundingInput('');
+      return;
+    }
+    setGroundingStepIndex((current) => current + 1);
+    setGroundingInput('');
+  };
+
+  const updateSessionInState = (sessionId, nextMessages, nextTitle) => {
+    setSessionList((current) => {
+      const existing = current.find((item) => item.id === sessionId);
+      const fallbackTitle = existing?.title || defaultChatTitle;
+      const resolvedTitle = resolveSessionTitle(nextTitle || fallbackTitle, nextMessages, fallbackTitle);
+      const updated = {
+        ...(existing || {
+          id: sessionId,
+          title: resolvedTitle,
+          summary: null,
+          started_at: new Date().toISOString(),
+          session_status: 'active',
+          initial_mood_value: null,
+        }),
+        title: resolvedTitle,
+        messages: nextMessages,
+      };
+      const withoutCurrent = current.filter((item) => item.id !== sessionId);
+      return [updated, ...withoutCurrent];
+    });
+  };
+
   const loadSessionMessages = (sessionId) => {
     const selected = sessionList.find((item) => item.id === sessionId);
     setActiveSessionId(sessionId);
     setActivePage('session');
     setMessages(selected?.messages?.length ? selected.messages : [{ role: 'assistant', text: INITIAL_ASSISTANT_MESSAGE }]);
     setDraft('');
-    setDraftSessionTitle('');
     setChatStatus('Loaded stored conversation.');
   };
 
-  const createNewSession = async (titleOverride = '') => {
+  const createNewSession = async () => {
     if (!supabase || !userId) {
       setChatStatus('Sign in first to start a session.');
       return null;
     }
-    const title = normalizeChatTitle(titleOverride, defaultChatTitle);
     const { data, error } = await supabase
       .from('therapy_sessions')
       .insert({
         user_id: userId,
-        title,
+        title: defaultChatTitle,
         initial_mood_value: null,
       })
       .select('id, title, summary, started_at, session_status, initial_mood_value')
@@ -577,7 +804,6 @@ function App() {
     setActivePage('session');
     setMessages([{ role: 'assistant', text: INITIAL_ASSISTANT_MESSAGE }]);
     setDraft('');
-    setDraftSessionTitle('');
     setChatStatus('New session created. Your next message will be stored.');
     return nextSession;
   };
@@ -600,69 +826,52 @@ function App() {
       setActiveSessionId(null);
       setMessages([{ role: 'assistant', text: INITIAL_ASSISTANT_MESSAGE }]);
       setDraft('');
-      setDraftSessionTitle('');
     }
   };
 
-  const updateSessionInState = (sessionId, nextMessages, nextTitle) => {
-    setSessionList((current) => {
-      const existing = current.find((item) => item.id === sessionId);
-      const resolvedTitle = normalizeChatTitle(nextTitle, existing?.title || defaultChatTitle);
-      const updated = {
-        ...(existing || {
-          id: sessionId,
-          title: resolvedTitle,
-          summary: null,
-          started_at: new Date().toISOString(),
-          session_status: 'active',
-          initial_mood_value: null,
-        }),
-        title: resolvedTitle,
-        messages: nextMessages,
-      };
-      const withoutCurrent = current.filter((item) => item.id !== sessionId);
-      return [updated, ...withoutCurrent];
-    });
-  };
-
-  const commitChatTitle = async (rawTitle) => {
-    const normalizedTitle = resolveSessionTitle(
-      rawTitle,
-      activeSession?.messages ?? messages,
-      activeSession?.title || defaultChatTitle
-    );
-
-    setChatTitleInput(normalizedTitle);
-
-    if (!activeSessionId) {
-      setDraftSessionTitle(normalizedTitle === defaultChatTitle ? '' : normalizedTitle);
+  const handleMicInput = () => {
+    if (!speechRecognitionSupported) {
+      setSpeechStatus('Speech recognition is not supported in this browser.');
       return;
     }
 
-    if (normalizedTitle === activeSession?.title) {
+    if (recognitionRef.current && isListening) {
+      recognitionRef.current.stop();
       return;
     }
 
-    setSessionList((current) =>
-      current.map((item) => (item.id === activeSessionId ? { ...item, title: normalizedTitle } : item))
-    );
+    const SpeechRecognitionApi = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognitionApi();
+    recognition.lang = 'en-US';
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false;
 
-    if (!supabase || !userId) {
-      return;
-    }
+    recognition.onstart = () => {
+      setIsListening(true);
+      setSpeechStatus('Listening...');
+    };
 
-    const { error } = await supabase
-      .from('therapy_sessions')
-      .update({ title: normalizedTitle })
-      .eq('id', activeSessionId)
-      .eq('user_id', userId);
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0]?.transcript || '')
+        .join(' ')
+        .trim();
+      setDraft(transcript);
+    };
 
-    if (error) {
-      setChatStatus(`Failed to update chat name: ${error.message}`);
-      return;
-    }
+    recognition.onerror = (event) => {
+      setSpeechStatus(event.error === 'not-allowed' ? 'Microphone permission was denied.' : 'Speech capture failed.');
+      setIsListening(false);
+    };
 
-    setChatStatus('Chat name updated.');
+    recognition.onend = () => {
+      setIsListening(false);
+      setSpeechStatus((current) => (current === 'Listening...' ? 'Speech captured.' : current));
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
   };
 
   const sendMessage = async () => {
@@ -676,8 +885,7 @@ function App() {
     }
     setIsTyping(true);
     setChatStatus('Saving your message...');
-    const currentTitleInput = normalizeChatTitle(chatTitleInput, draftSessionTitle || defaultChatTitle);
-    const createdSession = activeSessionId ? null : await createNewSession(currentTitleInput);
+    const createdSession = activeSessionId ? null : await createNewSession();
     const currentSessionId = activeSessionId || createdSession?.id;
     if (!currentSessionId) {
       setIsTyping(false);
@@ -695,14 +903,12 @@ function App() {
     };
     const nextMessages = [...baseMessages, userMessage];
     const sessionTitle = resolveSessionTitle(
-      activeSessionId ? currentTitleInput : createdSession?.title || currentTitleInput,
+      activeSession?.title || createdSession?.title || defaultChatTitle,
       nextMessages,
       activeSession?.title || createdSession?.title || defaultChatTitle
     );
     setMessages(nextMessages);
     setDraft('');
-    setDraftSessionTitle('');
-    setChatTitleInput(sessionTitle);
     const { error: titleError } = await supabase
       .from('therapy_sessions')
       .update({ title: sessionTitle })
@@ -763,6 +969,10 @@ function App() {
       setMoodStatus('Sign in first to save mood entries to Supabase.');
       return;
     }
+    if (!canLogMoodToday) {
+      setMoodStatus('You have already logged 3 moods today. Come back tomorrow for the next check-in.');
+      return;
+    }
     setIsMoodSaving(true);
     const { data: moodEntry, error: moodError } = await supabase
       .from('mood_entries')
@@ -792,21 +1002,188 @@ function App() {
         return;
       }
     }
-    setMoodEntries((current) => [{ ...moodEntry, tags: selectedTags }, ...current]);
+    const nextEntries = [{ ...moodEntry, tags: selectedTags }, ...moodEntries];
+    setMoodEntries(nextEntries);
     setIsMoodSaving(false);
-    setMoodStatus('Mood entry saved to Supabase.');
+    const remaining = Math.max(0, 3 - nextEntries.filter((entry) => getLocalDayKey(entry.created_at) === getLocalDayKey(new Date().toISOString())).length);
+    setMoodStatus(remaining > 0 ? `Mood entry saved. ${remaining} mood logs left today.` : 'Mood entry saved. You have reached today\'s limit.');
+  };
+
+  const openExercise = (exerciseId) => {
+    if (exerciseId === 'box') {
+      openBreathing();
+      return;
+    }
+    if (exerciseId === 'grounding') {
+      openGrounding();
+      return;
+    }
+    setActiveExerciseId(exerciseId);
+  };
+
+  const createJournal = async () => {
+    const fallbackJournal = {
+      id: `local-journal-${Date.now()}`,
+      title: `Journal ${journalList.length + 1}`,
+      pages: [buildBlankJournalPage(1)],
+    };
+
+    if (!supabase || !userId) {
+      setJournalList((current) => [...current, fallbackJournal]);
+      setActiveJournalId(fallbackJournal.id);
+      setActiveJournalPageId(fallbackJournal.pages[0].id);
+      setJournalStatus('Local journal created.');
+      return fallbackJournal;
+    }
+
+    const { data: journal, error: journalError } = await supabase
+      .from('cbt_journals')
+      .insert({
+        user_id: userId,
+        title: `Journal ${journalList.length + 1}`,
+      })
+      .select('id, title')
+      .single();
+    if (journalError) {
+      setJournalStatus(`Failed to create journal: ${journalError.message}`);
+      return null;
+    }
+    const { data: page, error: pageError } = await supabase
+      .from('cbt_journal_pages')
+      .insert({
+        journal_id: journal.id,
+        user_id: userId,
+        page_no: 1,
+        title: 'Page 1',
+        content: buildBlankJournalPage(1).content,
+      })
+      .select('id, page_no, title, content')
+      .single();
+    if (pageError) {
+      setJournalStatus(`Journal created, but first page failed: ${pageError.message}`);
+      return null;
+    }
+    const nextJournal = { ...journal, pages: [page] };
+    setJournalList((current) => [...current, nextJournal]);
+    setActiveJournalId(nextJournal.id);
+    setActiveJournalPageId(page.id);
+    setJournalStatus('Journal created.');
+    return nextJournal;
+  };
+
+  const addJournalPage = async () => {
+    let currentJournal = activeJournal;
+    if (!currentJournal) {
+      currentJournal = await createJournal();
+      if (!currentJournal) {
+        return;
+      }
+    }
+    const pageNumber = (currentJournal.pages?.length || 0) + 1;
+    const blankPage = buildBlankJournalPage(pageNumber);
+
+    if (!supabase || !userId || currentJournal.id.startsWith('local-journal')) {
+      const localPage = { ...blankPage, id: `local-page-${Date.now()}` };
+      setJournalList((current) =>
+        current.map((journal) =>
+          journal.id === currentJournal.id ? { ...journal, pages: [...journal.pages, localPage] } : journal
+        )
+      );
+      setActiveJournalId(currentJournal.id);
+      setActiveJournalPageId(localPage.id);
+      setJournalStatus('Page added.');
+      return;
+    }
+
+    const { data: page, error } = await supabase
+      .from('cbt_journal_pages')
+      .insert({
+        journal_id: currentJournal.id,
+        user_id: userId,
+        page_no: pageNumber,
+        title: blankPage.title,
+        content: blankPage.content,
+      })
+      .select('id, page_no, title, content')
+      .single();
+    if (error) {
+      setJournalStatus(`Failed to add page: ${error.message}`);
+      return;
+    }
+    setJournalList((current) =>
+      current.map((journal) =>
+        journal.id === currentJournal.id ? { ...journal, pages: [...journal.pages, page] } : journal
+      )
+    );
+    setActiveJournalId(currentJournal.id);
+    setActiveJournalPageId(page.id);
+    setJournalStatus('Page added.');
+  };
+
+  const updateJournalPage = (field, value) => {
+    if (!activeJournal || !activeJournalPage) {
+      return;
+    }
+    setJournalList((current) =>
+      current.map((journal) => {
+        if (journal.id !== activeJournal.id) {
+          return journal;
+        }
+        return {
+          ...journal,
+          pages: journal.pages.map((page) => {
+            if (page.id !== activeJournalPage.id) {
+              return page;
+            }
+            return {
+              ...page,
+              content: {
+                ...page.content,
+                [field]: value,
+              },
+            };
+          }),
+        };
+      })
+    );
+  };
+
+  const saveJournalPage = async () => {
+    if (!activeJournal || !activeJournalPage) {
+      return;
+    }
+    if (!supabase || !userId || activeJournal.id.startsWith('local-journal')) {
+      setJournalStatus('Local journal updated.');
+      return;
+    }
+    setIsJournalSaving(true);
+    const { error } = await supabase
+      .from('cbt_journal_pages')
+      .update({
+        title: activeJournalPage.title,
+        content: activeJournalPage.content,
+      })
+      .eq('id', activeJournalPage.id)
+      .eq('user_id', userId);
+    setIsJournalSaving(false);
+    if (error) {
+      setJournalStatus(`Failed to save page: ${error.message}`);
+      return;
+    }
+    setJournalStatus('Journal page saved.');
   };
 
   const phase = BREATH_PHASES[breathPhase];
   const countdown = breathingFinished ? 'Done' : phase.duration - breathTick;
   const progress = breathingFinished ? 1 : (breathTick + (breathRunning ? 1 : 0)) / phase.duration;
   const ringOffset = 439.8 * (1 - progress);
+  const currentGroundingStep = GROUNDING_STEPS[groundingStepIndex];
 
   if (isAuthLoading) {
     return (
       <div className="auth-shell">
         <div className="auth-card auth-card-loading">
-          <div className="auth-brand">Ai Therapist</div>
+          <div className="auth-brand">Serenity</div>
           <p className="auth-status">Checking your session...</p>
         </div>
       </div>
@@ -911,10 +1288,10 @@ function App() {
         <aside className="sidebar">
           <div className="sidebar-logo">
             <div className="logo-icon" aria-hidden="true">
-              AT
+              S
             </div>
             <div>
-              <div className="logo-name">Ai Therapist</div>
+              <div className="logo-name">Serenity</div>
               <div className="logo-sub">Personal support space</div>
             </div>
           </div>
@@ -945,41 +1322,10 @@ function App() {
           {activePage === 'session' && (
             <section className="page active-page">
               <header className="chat-header">
-                <div className="chat-header-copy">
-                  <div className="chat-header-avatar" aria-hidden="true" />
+                <div className="chat-header-copy chat-header-copy-simple">
                   <div className="chat-header-text">
                     <h1 className="page-title">{CHAT_HEADER_PROMPT}</h1>
-                    <input
-                      className="chat-title-input"
-                      type="text"
-                      aria-label="Chat name"
-                      value={chatTitleInput}
-                      onChange={(event) => {
-                        const { value: nextValue } = event.target;
-                        setChatTitleInput(nextValue);
-                        if (!activeSessionId) {
-                          setDraftSessionTitle(nextValue);
-                        }
-                      }}
-                      onBlur={(event) => {
-                        commitChatTitle(event.target.value);
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                          event.preventDefault();
-                          event.currentTarget.blur();
-                        }
-                        if (event.key === 'Escape') {
-                          event.preventDefault();
-                          const previousTitle = activeSession?.title || draftSessionTitle || defaultChatTitle;
-                          setChatTitleInput(previousTitle);
-                          if (!activeSessionId) {
-                            setDraftSessionTitle(previousTitle === defaultChatTitle ? '' : previousTitle);
-                          }
-                          event.currentTarget.blur();
-                        }
-                      }}
-                    />
+                    <div className="chat-title-label">{displayedChatTitle}</div>
                   </div>
                 </div>
                 <div className="header-actions">
@@ -996,14 +1342,14 @@ function App() {
                     key={`${message.role}-${message.sequence_no || index}`}
                     className={`msg-row ${message.role === 'user' ? 'user' : 'ai'}`}
                   >
-                    {message.role !== 'user' && <div className="ai-avatar">AT</div>}
+                    {message.role !== 'user' && <div className="ai-avatar">S</div>}
                     <div className={`bubble ${message.role === 'user' ? 'user' : 'ai'}`}>{message.text}</div>
                   </div>
                 ))}
 
                 {isTyping && (
                   <div className="msg-row ai">
-                    <div className="ai-avatar">AT</div>
+                    <div className="ai-avatar">S</div>
                     <div className="typing">
                       <span className="dot" />
                       <span className="dot" />
@@ -1015,7 +1361,13 @@ function App() {
 
               <div className="input-area">
                 <div className="input-row">
-                  <button className="mic-btn" type="button" aria-label="Voice message">
+                  <button
+                    className={`mic-btn ${isListening ? 'active' : ''}`}
+                    type="button"
+                    aria-label="Voice message"
+                    onClick={handleMicInput}
+                    disabled={isSessionLoading || isTyping}
+                  >
                     <MicIcon />
                   </button>
                   <input
@@ -1040,6 +1392,7 @@ function App() {
                     <SendIcon />
                   </button>
                 </div>
+                <p className="status-note speech-status">{speechStatus}</p>
               </div>
             </section>
           )}
@@ -1085,8 +1438,8 @@ function App() {
                       ))}
                     </div>
 
-                    <button className="primary-btn" type="button" onClick={logMood} disabled={isMoodSaving}>
-                      {isMoodSaving ? 'Saving...' : 'Save Mood'}
+                    <button className="primary-btn" type="button" onClick={logMood} disabled={isMoodSaving || !canLogMoodToday}>
+                      {isMoodSaving ? 'Saving...' : canLogMoodToday ? 'Save Mood' : 'Daily limit reached'}
                     </button>
                     <p className="status-note">{moodStatus}</p>
                   </div>
@@ -1104,9 +1457,9 @@ function App() {
                     </div>
 
                     <div className="stat-card">
-                      <div className="stat-kicker">Total entries</div>
-                      <div className="stat-val">{moodEntries.length}</div>
-                      <div className="stat-lbl">mood check-ins</div>
+                      <div className="stat-kicker">Today</div>
+                      <div className="stat-val">{todayMoodCount}/3</div>
+                      <div className="stat-lbl">mood logs used</div>
                     </div>
                   </div>
                 </div>
@@ -1156,7 +1509,7 @@ function App() {
                     <article key={item.id} className={`session-card ${activeSessionId === item.id ? 'active' : ''}`}>
                       <button className="session-open" type="button" onClick={() => loadSessionMessages(item.id)}>
                         <div className="session-row">
-                          <div className="session-icon">AT</div>
+                          <div className="session-icon">S</div>
                           <div className="session-copy">
                             <div className="session-title">{item.title}</div>
                             <div className="session-meta">{sessionMeta}</div>
@@ -1185,25 +1538,105 @@ function App() {
                   <h1 className="page-title">Guided Exercises</h1>
                   <p className="page-sub">Evidence-based tools for anxiety and stress</p>
                 </div>
+                {activeExerciseId === 'thought' && (
+                  <button className="btn-sm" type="button" onClick={() => setActiveExerciseId(null)}>
+                    Back
+                  </button>
+                )}
               </header>
 
               <div className="exercises-content">
-                <div className="ex-grid">
-                  {EXERCISES.map((exercise) => (
-                    <button
-                      key={exercise.id}
-                      className="ex-card"
-                      type="button"
-                      onClick={exercise.id === 'box' ? openBreathing : undefined}
-                    >
-                      <div className={`ex-icon ${exercise.accent}`}>{exercise.icon}</div>
-                      <div className="ex-title">{exercise.title}</div>
-                      <div className={`ex-sub ${exercise.accent}`}>{exercise.subtitle}</div>
-                      <div className="ex-desc">Structured technique for stress regulation and emotional reset.</div>
-                      <div className={`ex-link ${exercise.accent}`}>Start exercise -&gt;</div>
-                    </button>
-                  ))}
-                </div>
+                {activeExerciseId !== 'thought' && (
+                  <div className="ex-grid">
+                    {EXERCISES.map((exercise) => (
+                      <button
+                        key={exercise.id}
+                        className="ex-card"
+                        type="button"
+                        onClick={() => openExercise(exercise.id)}
+                      >
+                        <div className={`ex-icon ${exercise.accent}`}>{exercise.icon}</div>
+                        <div className="ex-title">{exercise.title}</div>
+                        <div className={`ex-sub ${exercise.accent}`}>{exercise.subtitle}</div>
+                        <div className="ex-desc">Structured technique for stress regulation and emotional reset.</div>
+                        <div className={`ex-link ${exercise.accent}`}>Start exercise -&gt;</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {activeExerciseId === 'thought' && (
+                  <div className="journal-app">
+                    <aside className="journal-sidebar">
+                      <div className="journal-sidebar-top">
+                        <button className="journal-tab active" type="button">Pages</button>
+                        <button className="journal-tab" type="button" disabled>Cards</button>
+                      </div>
+                      <div className="journal-pages">
+                        {activeJournal?.pages?.map((page) => (
+                          <button
+                            key={page.id}
+                            type="button"
+                            className={`journal-page-tile ${activeJournalPageId === page.id ? 'active' : ''}`}
+                            onClick={() => {
+                              setActiveJournalId(activeJournal.id);
+                              setActiveJournalPageId(page.id);
+                            }}
+                          >
+                            <span>{page.page_no}</span>
+                          </button>
+                        ))}
+                        <button className="journal-add-page" type="button" onClick={addJournalPage}>
+                          <PlusIcon />
+                          <span>Add a Page</span>
+                        </button>
+                      </div>
+                    </aside>
+
+                    <section className="journal-paper-shell">
+                      <div className="journal-toolbar">
+                        <div>
+                          <div className="page-title">CBT Journal</div>
+                          <p className="page-sub">{journalStatus}</p>
+                        </div>
+                        <div className="journal-actions">
+                          <button className="btn-sm" type="button" onClick={createJournal}>
+                            <PlusIcon />
+                            <span>New journal</span>
+                          </button>
+                          <button className="btn-sm" type="button" onClick={saveJournalPage} disabled={isJournalSaving || !activeJournalPage}>
+                            <span>{isJournalSaving ? 'Saving...' : 'Save page'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {isJournalLoading && <p className="status-note">Loading journal...</p>}
+
+                      {activeJournalPage && (
+                        <div className="journal-paper">
+                          <div className="journal-paper-inner">
+                            <div className="journal-meta-row">
+                              <div className="journal-meta-cell">Journal: {activeJournal?.title || 'Thought record'}</div>
+                              <div className="journal-meta-cell">Page {activeJournalPage.page_no}</div>
+                            </div>
+                            <div className="journal-fields">
+                              {CBT_FIELDS.map((field) => (
+                                <label key={field.key} className="journal-row">
+                                  <span>{field.label}</span>
+                                  <textarea
+                                    value={activeJournalPage.content?.[field.key] || ''}
+                                    onChange={(event) => updateJournalPage(field.key, event.target.value)}
+                                    placeholder={`Write ${field.label.toLowerCase()}...`}
+                                  />
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </section>
+                  </div>
+                )}
               </div>
             </section>
           )}
@@ -1243,6 +1676,49 @@ function App() {
               <button className="start-btn" type="button" onClick={toggleBreathing}>
                 {breathingFinished ? 'Close' : breathRunning ? 'Pause' : breathTick > 0 ? 'Resume' : 'Begin'}
               </button>
+            </div>
+          </div>
+        )}
+
+        {isGroundingOpen && (
+          <div className="modal-bg" onClick={closeGrounding} role="presentation">
+            <div className="modal modal-wide" onClick={(event) => event.stopPropagation()}>
+              <button className="close-btn" type="button" onClick={closeGrounding} aria-label="Close">
+                X
+              </button>
+              <div className="modal-title">Anchor Exercise</div>
+              <div className="modal-sub">5-4-3-2-1 grounding</div>
+
+              {!groundingFinished && (
+                <>
+                  <div className="grounding-step">{currentGroundingStep.count} things you can {currentGroundingStep.label}</div>
+                  <p className="grounding-copy">{currentGroundingStep.prompt}</p>
+                  <textarea
+                    className="grounding-input"
+                    value={groundingInput}
+                    onChange={(event) => setGroundingInput(event.target.value)}
+                    placeholder="Write what you notice..."
+                  />
+                  <button className="start-btn" type="button" onClick={advanceGrounding}>
+                    {groundingStepIndex === GROUNDING_STEPS.length - 1 ? 'Finish' : 'Next'}
+                  </button>
+                </>
+              )}
+
+              {groundingFinished && (
+                <div className="grounding-summary">
+                  <p className="grounding-copy">You finished the anchor exercise. Read back what kept you grounded.</p>
+                  {groundingResponses.map((entry) => (
+                    <div key={entry.label} className="grounding-summary-row">
+                      <strong>{entry.count} {entry.label}</strong>
+                      <span>{entry.text}</span>
+                    </div>
+                  ))}
+                  <button className="start-btn" type="button" onClick={closeGrounding}>
+                    Close
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
